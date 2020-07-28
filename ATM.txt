@@ -1,0 +1,94 @@
+def signup():
+   while True:
+       card = input("Enter the card number(must be 4 digits): ")
+       if not re.search(r'^\d{4}$', card):
+           continue
+       if equal(card):
+           continue
+       break
+   while True:
+       pin = input("Enter the pin number(must be 4 digits): ")
+       if not re.search(r'^\d{4}$', pin):
+           continue
+       if equal(pin):
+           continue
+       if pins_check(pin):
+           break
+       else:
+           print("The pin already exists")
+
+
+def login():
+   while True:
+       card_login = input("Enter your card number: ")
+       if not os.path.exists(card_login + '.txt'):
+           continue
+       break
+   user_file = open(card_login + '.txt')
+   userLines = user_file.readlines()
+   # The process of removing the line spacing
+   for line in range(len(userLines)):
+       new = userLines[line].replace('\n', '')
+       userLines.pop(line)
+       userLines.insert(line, new)
+   user_file.close()
+
+   actual_pin = userLines[1]
+   while True:
+       pin_login = input("Enter your pin: ")
+       if not pin_login == actual_pin:
+           continue
+       break
+
+   menu(userLines)
+   return
+
+
+while True:
+   enter = input("Would you like to sign in(I) or sign up(U): ".lower())
+   if enter == 'i':
+       login()
+       break
+   elif enter == 'u':
+       signup()
+       break
+
+
+
+def deposit(file, account, amount=False):
+    if not amount:
+        while True:
+            try:
+                amount = int(input("Enter amount to deposit: "))
+                break
+            except ValueError:
+                print("Only enter integers")
+
+    add_history(account, 'Deposit', file[account][0], amount)
+    file[account][0] += amount
+
+    if file[account][1] == 'Basic':
+        add_everyday_free(file, account)
+    elif file[account][1] == 'Unlimited':
+        add_unlimited_transactions(file, account)
+
+
+
+def withdraw(file, account, amount=False):
+    if not amount:
+        while True:
+            try:
+                amount = int(input("Enter amount to withdraw: "))
+                break
+            except ValueError:
+                print("Only enter integers")
+    if amount < file[account][0]:
+        file[account][0] -= amount
+        add_history(account, 'Withdraw', file[account][0], -amount)
+
+        if file[account][1] == 'Unlimited':
+            add_unlimited_transactions(file, account)
+        elif file[account][1] == "Basic":
+            add_everyday_free(file, account)
+    else:
+        print("You do not have enough money")
